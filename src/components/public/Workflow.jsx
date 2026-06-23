@@ -9,7 +9,7 @@ function Workflow(){
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
                 {/* <!-- Connecting Line (Desktop only) --> */}
-                <div class="hidden md:block absolute top-2/3 left-0 w-full h-1 bg-gray-100 -translate-y-1/2 z-0"></div>
+                <div class="hidden md:block absolute top-7/10 left-0 w-full h-1 bg-gray-100 -translate-y-1/2 z-0"></div>
 
                 {/* Step 1 */}
                 <div class="relative z-10 text-center">
