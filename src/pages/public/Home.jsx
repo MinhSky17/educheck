@@ -9,12 +9,11 @@ import FAQ from '../../components/public/FAQ';
 import CTA from '../../components/public/CTA';
 import Footer from '../../components/public/Footer';
 
-
-function Home(){
-    return(
+function Home({ currentUser, userProfile }) {
+    return (
         <div>
             <div className="font-sans text-gray-800 antialiased bg-white">
-                <Header/>
+                <Header currentUser={currentUser} userProfile={userProfile} />
                 <Hero/>
                 <Feature/>
                 <Workflow/>
@@ -26,7 +25,6 @@ function Home(){
                 <Footer/>
             </div>
         </div>
-        
     );
 }
 
