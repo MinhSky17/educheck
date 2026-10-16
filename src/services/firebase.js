@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 
 // Cấu hình Firebase cho dự án educheck của riêng bạn từ ảnh image_0ce876.png
 const firebaseConfig = {
@@ -18,4 +19,18 @@ const app = initializeApp(firebaseConfig);
 
 // Xuất bản (export) các dịch vụ để sẵn sàng gọi dùng ở các file giao diện khác
 export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
 export const db = getFirestore(app);
+
+export const loginWithGoogle = async () => {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    return result.user;
+  } catch (error) {
+    console.error("Lỗi đăng nhập Google:", error);
+    throw error;
+  }
+};
+
+// Hàm đăng xuất
+export const logoutUser = () => signOut(auth);

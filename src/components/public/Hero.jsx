@@ -1,3 +1,5 @@
+import heroRightImg from '../../assets/image/public/hero-right.png';
+
 function Hero(){
 
 
@@ -29,8 +31,13 @@ function Hero(){
                         </div>
                     </div>
                     {/* Right */}
-                    <div className="ralative mx-auto w-full max-w-md lg:max-w-full lg:mr-0 z-10">
-                        <img src="https://res.cloudinary.com/dtrf9exnz/image/upload/q_auto/f_auto/v1781863590/Right__Mockup_Dashboard_p0h70i.png" alt="hero-right"></img>
+                    <div className="relative mx-auto w-full max-w-md lg:max-w-full lg:mr-0 z-10">
+                        {/* <img src="https://res.cloudinary.com/dtrf9exnz/image/upload/q_auto/f_auto/v1781863590/Right__Mockup_Dashboard_p0h70i.png" alt="hero-right"></img> */}
+                        <img 
+                            src={heroRightImg} 
+                            alt="hero-right" 
+                            className="w-full h-auto object-contain"
+                        />                    
                     </div>
                 </div>
 
