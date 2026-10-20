@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, getUserProfile } from "./services/firebase";
 import Home from "./pages/public/Home.jsx";
 import RoleSelectModal from "./components/public/RoleSelectModal";
 import TeacherDashboard from "./pages/teacher/TeacherDashboard.jsx";
 import StudentDashboard from "./pages/student/StudentDashboard.jsx";
+import ClassDetails from "./pages/shared/ClassDetails.jsx";
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -22,17 +24,14 @@ function App() {
             setUserProfile(profile);
             setIsRoleModalOpen(false);
           } else {
-            // Đã đăng nhập nhưng chưa có vai trò -> Mới mở modal chọn vai trò
             setUserProfile(null);
             setIsRoleModalOpen(true);
           }
         } catch (error) {
           console.error("Lỗi khi kiểm tra hồ sơ:", error);
-          // Không tự bật modal nếu bị lỗi mạng/permissions
           setIsRoleModalOpen(false);
         }
       } else {
-        // Chưa đăng nhập: Reset toàn bộ, TUYỆT ĐỐI không mở modal
         setCurrentUser(null);
         setUserProfile(null);
         setIsRoleModalOpen(false);
@@ -56,23 +55,15 @@ function App() {
     );
   }
 
-  // 1. Nếu đã đăng nhập VÀ đã có vai trò Giáo viên -> Vào Dashboard Giáo viên
-  if (currentUser && userProfile?.role === "teacher") {
-    return <TeacherDashboard user={currentUser} userProfile={userProfile} />;
-  }
+  // Khóa bảo vệ trang nội bộ
+  const ProtectedRoute = ({ children }) => {
+    if (!currentUser) return <Navigate to="/" />;
+    if (!userProfile?.role) return <Navigate to="/" />;
+    return children;
+  };
 
-  // 2. Nếu đã đăng nhập VÀ đã có vai trò Học sinh -> Vào Dashboard Học sinh
-  if (currentUser && userProfile?.role === "student") {
-    return <StudentDashboard user={currentUser} userProfile={userProfile} />;
-  }
-
-  // 3. Khách chưa đăng nhập HOẶC vừa đăng nhập xong đang đợi chọn vai trò:
-  // Render Landing Page (Home), chỉ mở Modal chọn vai trò khi currentUser đã tồn tại!
   return (
-    <>
-      <Home currentUser={currentUser} userProfile={userProfile} />
-
-      {/* Chỉ hiển thị modal chọn vai trò khi ĐÃ đăng nhập và CHƯA có vai trò */}
+    <BrowserRouter>
       {currentUser && !userProfile?.role && (
         <RoleSelectModal
           isOpen={isRoleModalOpen}
@@ -80,7 +71,36 @@ function App() {
           onRoleSelected={handleRoleSelected}
         />
       )}
-    </>
+
+      <Routes>
+        <Route 
+          path="/" 
+          element={
+            !currentUser ? (
+              <Home currentUser={currentUser} userProfile={userProfile} />
+            ) : userProfile?.role === "teacher" ? (
+              <TeacherDashboard user={currentUser} userProfile={userProfile} />
+            ) : userProfile?.role === "student" ? (
+              <StudentDashboard user={currentUser} userProfile={userProfile} />
+            ) : (
+              <Home currentUser={currentUser} userProfile={userProfile} />
+            )
+          } 
+        />
+
+        {/* Tuyến đường vào trang chi tiết lớp học */}
+        <Route 
+          path="/class/:classId" 
+          element={
+            <ProtectedRoute>
+              <ClassDetails user={currentUser} userProfile={userProfile} />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

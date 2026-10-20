@@ -1,23 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
-  Button, 
-  Typography, 
-  Empty, 
-  Row, 
-  Col, 
-  Tooltip, 
-  message, 
-  Spin, 
-  Dropdown, 
-  Modal 
+  Button, Typography, Empty, Row, Col, Tooltip, 
+  message, Spin, Dropdown, Modal 
 } from "antd";
 import { 
-  PlusOutlined, 
-  TeamOutlined, 
-  CopyOutlined, 
-  MoreOutlined, 
-  ReloadOutlined, 
-  CheckCircleOutlined 
+  PlusOutlined, TeamOutlined, CopyOutlined, 
+  MoreOutlined, ReloadOutlined, CheckCircleOutlined 
 } from "@ant-design/icons";
 import Header from "../../components/public/Header";
 import CreateClassModal from "../../components/teacher/CreateClassModal";
@@ -25,20 +14,21 @@ import { getTeacherClasses, resetClassCode } from "../../services/firebase";
 
 const { Title, Paragraph } = Typography;
 
-function TeacherDashboard({ user, userProfile }) {
+export default function TeacherDashboard({ user, userProfile }) {
+  // HOOK PHẢI ĐẶT BÊN TRONG COMPONENT
+  const navigate = useNavigate(); 
+  
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [copiedCode, setCopiedCode] = useState(null);
 
-  // Tải danh sách lớp
   const fetchClasses = async () => {
     if (!user?.uid) return;
     try {
       const data = await getTeacherClasses(user.uid);
       setClasses(data);
     } catch (err) {
-      console.error(err);
       message.error("Lỗi khi tải danh sách lớp học!");
     } finally {
       setLoading(false);
@@ -49,7 +39,6 @@ function TeacherDashboard({ user, userProfile }) {
     fetchClasses();
   }, [user]);
 
-  // Sao chép mã lớp (kèm hiệu ứng tích xanh tạm thời)
   const handleCopyCode = (code) => {
     navigator.clipboard.writeText(code);
     setCopiedCode(code);
@@ -57,11 +46,10 @@ function TeacherDashboard({ user, userProfile }) {
     setTimeout(() => setCopiedCode(null), 2500);
   };
 
-  // Đổi mã lớp mới (BR-CL-11)
   const handleResetCode = (classItem) => {
     Modal.confirm({
       title: `Đặt lại mã lớp "${classItem.name}"?`,
-      content: "Mã lớp cũ sẽ bị vô hiệu hóa ngay lập tức. Học sinh đã tham gia lớp vẫn giữ nguyên, không bị ảnh hưởng.",
+      content: "Mã lớp cũ sẽ bị vô hiệu hóa ngay lập tức. Học sinh đã tham gia lớp vẫn giữ nguyên.",
       okText: "Đổi mã mới",
       okType: "danger",
       cancelText: "Hủy",
@@ -79,10 +67,6 @@ function TeacherDashboard({ user, userProfile }) {
     });
   };
 
-  const handleClassCreated = (newClass) => {
-    setClasses((prev) => [newClass, ...prev]);
-  };
-
   const activeCount = classes.filter((c) => c.status === "active").length;
 
   return (
@@ -90,7 +74,6 @@ function TeacherDashboard({ user, userProfile }) {
       <Header currentUser={user} userProfile={userProfile} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
-        {/* Banner tiêu đề */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
             <div className="flex items-center gap-3">
@@ -105,10 +88,7 @@ function TeacherDashboard({ user, userProfile }) {
           </div>
 
           <Button
-            type="primary"
-            size="large"
-            icon={<PlusOutlined />}
-            shape="round"
+            type="primary" size="large" icon={<PlusOutlined />} shape="round"
             className="shadow-md shadow-blue-500/20"
             disabled={activeCount >= 30}
             onClick={() => setIsCreateModalOpen(true)}
@@ -117,23 +97,16 @@ function TeacherDashboard({ user, userProfile }) {
           </Button>
         </div>
 
-        {/* Nội dung danh sách */}
         {loading ? (
-          <div className="flex justify-center py-20">
-            <Spin tip="Đang tải dữ liệu lớp học..." size="large" />
-          </div>
+          <div className="flex justify-center py-20"><Spin tip="Đang tải dữ liệu lớp học..." size="large" /></div>
         ) : classes.length === 0 ? (
           <div className="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-12 text-center">
             <Empty
               image={<TeamOutlined style={{ fontSize: 56, color: "#9ca3af" }} />}
               description={
                 <div className="mt-2">
-                  <p className="font-semibold text-gray-700 text-base mb-1">
-                    Bạn chưa có lớp học nào
-                  </p>
-                  <p className="text-gray-400 text-sm">
-                    Hãy bấm nút "Tạo lớp học mới" phía trên để lấy mã mời học sinh nhé!
-                  </p>
+                  <p className="font-semibold text-gray-700 text-base mb-1">Bạn chưa có lớp học nào</p>
+                  <p className="text-gray-400 text-sm">Hãy bấm nút "Tạo lớp học mới" phía trên để lấy mã mời học sinh nhé!</p>
                 </div>
               }
             />
@@ -149,82 +122,44 @@ function TeacherDashboard({ user, userProfile }) {
               return (
                 <Col xs={24} sm={12} lg={8} key={c.id}>
                   <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden group">
-                    {/* Header Thẻ lớp học với Gradient động theo themeColor */}
-                    <div 
-                      className="p-5 text-white relative"
-                      style={{ background: bgGradient }}
-                    >
+                    <div className="p-5 text-white relative" style={{ background: bgGradient }}>
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-xs bg-white/20 backdrop-blur-md px-2.5 py-0.5 rounded-full font-medium">
                           {c.subject || "Lớp học chung"}
                         </span>
-
-                        {/* Menu cài đặt lớp (3 chấm) */}
                         <Dropdown
-                          menu={{
-                            items: [
-                              {
-                                key: "reset-code",
-                                label: "Đặt lại mã lớp mới",
-                                icon: <ReloadOutlined />,
-                                onClick: () => handleResetCode(c),
-                              },
-                            ],
-                          }}
-                          trigger={["click"]}
-                          placement="bottomRight"
+                          menu={{ items: [{ key: "reset-code", label: "Đặt lại mã lớp mới", icon: <ReloadOutlined />, onClick: () => handleResetCode(c) }] }}
+                          trigger={["click"]} placement="bottomRight"
                         >
-                          <Button
-                            type="text"
-                            shape="circle"
-                            size="small"
-                            className="text-white hover:bg-white/20"
-                            icon={<MoreOutlined style={{ fontSize: 18 }} />}
-                          />
+                          <Button type="text" shape="circle" size="small" className="text-white hover:bg-white/20" icon={<MoreOutlined style={{ fontSize: 18 }} />} />
                         </Dropdown>
                       </div>
-
-                      <h3 className="font-bold text-xl text-white truncate m-0 drop-shadow-sm">
-                        {c.name}
-                      </h3>
-                      <p className="text-xs text-white/80 mt-1 m-0">
-                        {c.teacherName}
-                      </p>
+                      <h3 className="font-bold text-xl text-white truncate m-0 drop-shadow-sm">{c.name}</h3>
+                      <p className="text-xs text-white/80 mt-1 m-0">{c.teacherName}</p>
                     </div>
 
-                    {/* Thân thẻ */}
                     <div className="p-5 flex-1 flex flex-col justify-between">
                       <p className="text-gray-500 text-sm line-clamp-2 min-h-[40px] mb-4">
                         {c.description || "Chưa có mô tả cho lớp học này."}
                       </p>
-
-                      {/* Hộp mã lớp (Class Code Pill) */}
                       <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-xl mb-4">
                         <div>
-                          <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 block">
-                            MÃ THAM GIA LỚP
-                          </span>
-                          <span className="font-mono font-bold text-xl text-gray-800 tracking-widest">
-                            {c.code}
-                          </span>
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 block">MÃ THAM GIA LỚP</span>
+                          <span className="font-mono font-bold text-xl text-gray-800 tracking-widest">{c.code}</span>
                         </div>
                         <Tooltip title={isCopied ? "Đã chép!" : "Sao chép mã lớp"}>
                           <Button
-                            type={isCopied ? "primary" : "default"}
-                            shape="circle"
+                            type={isCopied ? "primary" : "default"} shape="circle"
                             icon={isCopied ? <CheckCircleOutlined /> : <CopyOutlined />}
                             onClick={() => handleCopyCode(c.code)}
                             className={isCopied ? "bg-green-600 border-green-600" : ""}
                           />
                         </Tooltip>
                       </div>
-
-                      {/* Footer thẻ */}
                       <div className="flex items-center justify-between pt-3 border-t border-gray-100 text-xs text-gray-500">
-                        <span className="flex items-center gap-1 font-medium">
-                          <TeamOutlined /> {c.studentCount || 0} học sinh
-                        </span>
-                        <Button type="link" size="small" className="font-medium p-0">
+                        <span className="flex items-center gap-1 font-medium"><TeamOutlined /> {c.studentCount || 0} học sinh</span>
+                        {/* GỌI NAVIGATE TẠI ĐÂY */}
+                        <Button type="link" size="small" className="font-medium p-0" onClick={() => navigate(`/class/${c.id}`)}>
                           Vào lớp học &rarr;
                         </Button>
                       </div>
@@ -237,16 +172,10 @@ function TeacherDashboard({ user, userProfile }) {
         )}
       </main>
 
-      {/* Modal Tạo lớp */}
       <CreateClassModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        user={user}
-        existingClasses={classes}
-        onClassCreated={handleClassCreated}
+        isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)}
+        user={user} existingClasses={classes} onClassCreated={(newClass) => setClasses((prev) => [newClass, ...prev])}
       />
     </div>
   );
 }
-
-export default TeacherDashboard;
