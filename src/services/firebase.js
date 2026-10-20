@@ -1,5 +1,13 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signOut,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile
+} from "firebase/auth";
 import { 
   getFirestore, 
   doc, 
@@ -53,6 +61,26 @@ export const loginWithGoogle = async () => {
 export const logout = async () => {
   await signOut(auth);
 };
+
+// Đăng ký bằng Email & Mật khẩu
+export const registerWithEmail = async ({ fullName, email, password }) => {
+  const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+  const user = userCredential.user;
+  
+  // Cập nhật tên hiển thị lên Firebase Auth
+  if (fullName) {
+    await updateProfile(user, { displayName: fullName.trim() });
+  }
+  return user;
+};
+
+// Đăng nhập bằng Email & Mật khẩu
+export const loginWithEmail = async (email, password) => {
+  const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
+  return userCredential.user;
+};
+
+// Lấy thông tin user từ Firestore
 
 // Lấy thông tin user từ Firestore
 export const getUserProfile = async (uid) => {
